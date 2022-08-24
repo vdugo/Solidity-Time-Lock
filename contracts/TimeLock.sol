@@ -29,6 +29,8 @@ contract TimeLock
         uint256 timestamp
     );
 
+    event Cancel(bytes32 indexed txId);
+
     uint256 public constant MIN_DELAY = 10 seconds;
     uint256 public constant MAX_DELAY = 1000 seconds;
     // once a transaction gets queued we have 1000 seconds before it expires
@@ -155,5 +157,17 @@ contract TimeLock
         emit Execute(txId, _target, _value, _func, _data, _timestamp);
 
         return res;
+    }
+
+    function cancel(bytes32 _txId) external onlyOwner
+    {
+        if (!queued[_txId])
+        {
+            revert NotQueuedError(_txId);
+        }
+
+        queued[_txId] = false;
+
+        emit Cancel(_txId);
     }
 }
